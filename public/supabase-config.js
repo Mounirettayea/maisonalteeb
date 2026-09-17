@@ -9,7 +9,7 @@ window.MAISON_SUPABASE = {
 // Admin product editor: load the camera barcode scanner only on admin.html.
 if(location.pathname==='/admin.html'){
   const s=document.createElement('script');
-  s.src='/admin-scanner.js?v=1';
+  s.src='/admin-scanner.js?v=2';
   s.defer=true;
   document.head.appendChild(s);
 }
