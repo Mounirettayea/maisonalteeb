@@ -25,7 +25,8 @@ create table if not exists public.profiles (
   created_at timestamptz not null default now()
 );
 
-create or replace function public.has_role(required_roles text[])
+create schema if not exists private;
+create or replace function private.has_role(required_roles text[])
 returns boolean
 language sql
 stable
@@ -39,82 +40,48 @@ as $$
       and role = any(required_roles)
   );
 $$;
-
-revoke all on function public.has_role(text[]) from anon;
-grant execute on function public.has_role(text[]) to authenticated;
+revoke all on function private.has_role(text[]) from public, anon;
+grant execute on function private.has_role(text[]) to authenticated;
+drop function if exists public.has_role(text[]);
+revoke all on function public.handle_new_user() from public, anon, authenticated;
 
 alter table public.products enable row level security;
 
--- Public storefront access.
 drop policy if exists "public read active products" on public.products;
-create policy "public read active products"
-on public.products for select
-to anon, authenticated
-using (active = true);
+drop policy if exists "Public can read active products" on public.products;
+create policy "public read active products" on public.products for select to anon, authenticated using (active = true);
 
--- Staff can read the complete catalog; role is checked server-side by RLS.
 drop policy if exists "staff can read all products" on public.products;
-create policy "staff can read all products"
-on public.products for select
-to authenticated
-using (public.has_role(array['admin','manager','cashier']::text[]));
+create policy "staff can read all products" on public.products for select to authenticated using (private.has_role(array['admin','manager','cashier']::text[]));
 
--- Only admins/managers can create or modify products.
 drop policy if exists "authenticated insert products" on public.products;
 drop policy if exists "managers can insert products" on public.products;
-create policy "managers can insert products"
-on public.products for insert
-to authenticated
-with check (public.has_role(array['admin','manager']::text[]));
+create policy "managers can insert products" on public.products for insert to authenticated with check (private.has_role(array['admin','manager']::text[]));
 
 drop policy if exists "authenticated update products" on public.products;
 drop policy if exists "managers can update products" on public.products;
-create policy "managers can update products"
-on public.products for update
-to authenticated
-using (public.has_role(array['admin','manager']::text[]))
-with check (public.has_role(array['admin','manager']::text[]));
+create policy "managers can update products" on public.products for update to authenticated using (private.has_role(array['admin','manager']::text[])) with check (private.has_role(array['admin','manager']::text[]));
 
 drop policy if exists "authenticated delete products" on public.products;
 drop policy if exists "admins can delete products" on public.products;
-create policy "admins can delete products"
-on public.products for delete
-to authenticated
-using (public.has_role(array['admin']::text[]));
+create policy "admins can delete products" on public.products for delete to authenticated using (private.has_role(array['admin']::text[]));
 
--- Public product images; uploads/updates require staff roles.
-insert into storage.buckets (id, name, public)
-values ('product-images', 'product-images', true)
-on conflict (id) do update set public = true;
+insert into storage.buckets (id, name, public) values ('product-images', 'product-images', true) on conflict (id) do update set public = true;
 
 drop policy if exists "public read product images" on storage.objects;
-create policy "public read product images"
-on storage.objects for select
-to anon, authenticated
-using (bucket_id = 'product-images');
+create policy "public read product images" on storage.objects for select to anon, authenticated using (bucket_id = 'product-images');
 
 drop policy if exists "authenticated upload product images" on storage.objects;
 drop policy if exists "managers upload product images" on storage.objects;
-create policy "managers upload product images"
-on storage.objects for insert
-to authenticated
-with check (bucket_id = 'product-images' and public.has_role(array['admin','manager']::text[]));
+create policy "managers upload product images" on storage.objects for insert to authenticated with check (bucket_id='product-images' and private.has_role(array['admin','manager']::text[]));
 
 drop policy if exists "authenticated update product images" on storage.objects;
 drop policy if exists "managers update product images" on storage.objects;
-create policy "managers update product images"
-on storage.objects for update
-to authenticated
-using (bucket_id = 'product-images' and public.has_role(array['admin','manager']::text[]))
-with check (bucket_id = 'product-images' and public.has_role(array['admin','manager']::text[]));
+create policy "managers update product images" on storage.objects for update to authenticated using (bucket_id='product-images' and private.has_role(array['admin','manager']::text[])) with check (bucket_id='product-images' and private.has_role(array['admin','manager']::text[]));
 
 drop policy if exists "authenticated delete product images" on storage.objects;
 drop policy if exists "admins delete product images" on storage.objects;
-create policy "admins delete product images"
-on storage.objects for delete
-to authenticated
-using (bucket_id = 'product-images' and public.has_role(array['admin']::text[]));
+create policy "admins delete product images" on storage.objects for delete to authenticated using (bucket_id='product-images' and private.has_role(array['admin']::text[]));
 
--- IMPORTANT: after creating the Supabase Auth user, assign the owner/admin role:
--- insert into public.profiles (id, role) values ('AUTH-USER-UUID', 'admin')
--- on conflict (id) do update set role = 'admin';
+-- After creating the Supabase Auth user, assign the owner/admin role:
+-- insert into public.profiles (id, role) values ('AUTH-USER-UUID', 'admin') on conflict (id) do update set role = 'admin';
