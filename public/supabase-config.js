@@ -19,7 +19,7 @@ if(location.pathname==='/admin.html'){
   document.head.appendChild(timeoutScript);
 }
 
-// Mobile navigation + compact responsive layout for the public homepage.
+// Mobile navigation + compact responsive layout + cart quantity controls for the public homepage.
 if(location.pathname==='/' || location.pathname==='/index.html'){
   const style=document.createElement('style');
   style.textContent=`
@@ -125,4 +125,9 @@ if(location.pathname==='/' || location.pathname==='/index.html'){
       if(nav)nav.classList.remove('mobile-open');
     }
   });
+
+  const cartScript=document.createElement('script');
+  cartScript.src='/cart-controls.js?v=1';
+  cartScript.async=false;
+  document.head.appendChild(cartScript);
 }
