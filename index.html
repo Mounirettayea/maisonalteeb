@@ -936,7 +936,10 @@
   text-decoration: none;
   cursor: pointer;
 }
-      </style>
+      
+        .hero-logo { max-width: 80%; max-height: 340px; width: auto; height: auto; object-fit: contain; border: 0 !important; box-shadow: 0 18px 45px rgba(0,0,0,.18); }
+        @media (max-width: 768px) { .hero-logo { max-width: 72%; max-height: 260px; } }
+</style>
     </head>
     <body>
       <!-- Global App Configuration (Editable from single source) -->
@@ -2697,7 +2700,7 @@ Object.keys(TRANSLATIONS.fr).forEach(k => {
                             </div>
                         </div>
                         <div class="hero-image-wrapper">
-                            <img src="https://scontent.frak3-1.fna.fbcdn.net/v/t39.30808-6/777824629_1375131914768767_5405886899113113687_n.jpg?stp=dst-jpg_tt6&cstp=mx767x767&ctp=p526x296&_nc_cat=100&ccb=1-7&_nc_sid=127cfc&_nc_ohc=ns2siTADIyQQ7kNvwGhITjB&_nc_oc=AdqD-NNUqsZdhEai9Vd5pic9MrbUaA-3et8Kzo0H0trcAFc6AqNeHQzhqAg4Kgqp4Es&_nc_zt=23&_nc_ht=scontent.frak3-1.fna&_nc_gid=4SABOwcoh3ZcpgGwz6bYuQ&_nc_ss=7a2a8&oh=00_AQGv7OdIx8yVj1BxADxmHJPsVHWviKt6Zd-jtf-y6bWfcA&oe=6A8BE793" alt="Luxury Perfume Bottle" loading="lazy">
+                            <img src="/logo.png" alt="Maison Al Teeb" loading="eager" class="hero-logo">
                         </div>
                     </div>
                 </section>
