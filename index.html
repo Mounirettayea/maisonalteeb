@@ -2900,7 +2900,7 @@ Object.keys(TRANSLATIONS.fr).forEach(k => {
                         <i data-lucide="heart" size="18"></i>
                     </button>
 
-                    <div class="product-image-container" onclick="openProductDetailModal(${
+                    <div class="product-image-container" onclick="event.stopPropagation(); openProductDetailModal(${
                       product.id
                     })">
                         <img src="${product.image}" alt="${
@@ -2912,7 +2912,7 @@ Object.keys(TRANSLATIONS.fr).forEach(k => {
                         <span class="product-category">${productDisplayCategory(product.category)} • ${
             product.gender
           }</span>
-                        <h3 class="product-name" onclick="openProductDetailModal(${
+                        <h3 class="product-name" onclick="event.stopPropagation(); openProductDetailModal(${
                           product.id
                         })">${productDisplayName(product)}</h3>
                         <span class="product-size">${product.size}</span>
@@ -2928,7 +2928,7 @@ Object.keys(TRANSLATIONS.fr).forEach(k => {
                             }
                         </div>
 
-                        <button class="add-to-cart-btn" onclick="addToCart(${
+                        <button class="add-to-cart-btn" onclick="event.stopPropagation(); addToCart(${
                           product.id
                         })">
                             <i data-lucide="shopping-bag" size="16"></i> ${I18N[currentLang].addToCart}
@@ -3032,9 +3032,9 @@ Object.keys(TRANSLATIONS.fr).forEach(k => {
           const html = `
                 <div class="product-detail-grid">
                     <div class="product-detail-gallery">
-                        <img src="\${detailImages[0] || product.image || ''}" class="product-detail-img product-detail-main" alt="\${product.name}">
-                        \${detailImages.length > 1 ? \`<div class="product-detail-thumbs">\${detailImages.slice(1).map((url) => \`<img src="\${url}" alt="\${product.name}" onclick="this.closest('.product-detail-gallery').querySelector('.product-detail-main').src=this.src">\`).join('')}</div>\` : ''}
-                        \${product.videoUrl ? \`<video class="product-detail-video" controls playsinline preload="metadata"><source src="\${product.videoUrl}"></video>\` : ''}
+                        <img src="${detailImages[0] || product.image || ''}" class="product-detail-img product-detail-main" alt="${product.name}">
+                        ${detailImages.length > 1 ? `<div class="product-detail-thumbs">${detailImages.slice(1).map((url) => `<img src="${url}" alt="${product.name}" onclick="this.closest('.product-detail-gallery').querySelector('.product-detail-main').src=this.src">`).join('')}</div>` : ''}
+                        ${product.videoUrl ? `<video class="product-detail-video" controls playsinline preload="metadata"><source src="${product.videoUrl}"></video>` : ''}
                     </div>
                     <div>
                         <span style="color:var(--gold-primary); font-size:0.85rem; font-weight:bold;">${
