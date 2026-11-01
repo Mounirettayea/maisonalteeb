@@ -3048,7 +3048,7 @@ Object.keys(TRANSLATIONS.fr).forEach(k => {
             `السلام عليكم، بغيت نطلب ${product.name}، الحجم ${product.size}، والثمن ${product.price} ${CONFIG.CURRENCY}`
           );
           const waUrl = `https://wa.me/${CONFIG.WHATSAPP_NUMBER}?text=${waText}`;
-          const detailImages = [...new Set([...(Array.isArray(product.images) ? product.images : []), product.image].filter(Boolean))].slice(0, 6);
+          const detailImages = [...new Set([...(Array.isArray(product.images) ? product.images : []), product.image].filter(Boolean))].slice(0, 10);
 
           const html = `
                 <div class="product-detail-grid">
@@ -3153,7 +3153,7 @@ Object.keys(TRANSLATIONS.fr).forEach(k => {
         function setProductGalleryImage(button, index, productId) {
           const product = PRODUCTS_DATABASE.find((p) => p.id === productId);
           if (!product) return;
-          const images = [...new Set([...(Array.isArray(product.images) ? product.images : []), product.image].filter(Boolean))].slice(0, 6);
+          const images = [...new Set([...(Array.isArray(product.images) ? product.images : []), product.image].filter(Boolean))].slice(0, 10);
           const main = button.closest('.product-detail-gallery').querySelector('.product-detail-main');
           main.src = images[index] || product.image;
           button.closest('.product-detail-thumbs').querySelectorAll('button').forEach((b) => b.classList.remove('active'));
@@ -3162,7 +3162,7 @@ Object.keys(TRANSLATIONS.fr).forEach(k => {
         function openProductImageViewer(productId, index) {
           const product = PRODUCTS_DATABASE.find((p) => p.id === productId);
           if (!product) return;
-          activeProductViewer.images = [...new Set([...(Array.isArray(product.images) ? product.images : []), product.image].filter(Boolean))].slice(0, 6);
+          activeProductViewer.images = [...new Set([...(Array.isArray(product.images) ? product.images : []), product.image].filter(Boolean))].slice(0, 10);
           activeProductViewer.index = Math.max(0, Math.min(index, activeProductViewer.images.length - 1));
           if (!activeProductViewer.images.length) return;
           let viewer = document.getElementById('product-image-lightbox');
