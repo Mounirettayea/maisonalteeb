@@ -845,10 +845,29 @@
           border: 1px solid var(--border-color);
         }
         .product-detail-gallery{display:flex;flex-direction:column;gap:12px;min-width:0}
-        .product-detail-main{aspect-ratio:1/1;max-height:520px;background:var(--bg-cream-card)}
+        .product-detail-main-wrap{position:relative;overflow:hidden;border-radius:9px;background:#080b09;border:1px solid rgba(212,175,55,.45);box-shadow:0 14px 35px rgba(0,0,0,.12)}
+        .product-detail-main{display:block;aspect-ratio:1/1;max-height:520px;background:var(--bg-cream-card);cursor:zoom-in;transition:transform .35s ease}
+        .product-detail-main-wrap:after{content:'⤢ تكبير الصورة';position:absolute;bottom:12px;left:12px;padding:7px 11px;border:1px solid rgba(212,175,55,.55);border-radius:30px;background:rgba(5,15,10,.78);color:#f5d982;font-size:.78rem;pointer-events:none}
         .product-detail-thumbs{display:flex;gap:9px;flex-wrap:wrap}
-        .product-detail-thumbs img{width:68px;height:68px;object-fit:cover;border:1px solid var(--border-color);border-radius:5px;cursor:pointer}
-        .product-detail-video{width:100%;max-height:360px;border-radius:6px;background:#000;margin-top:5px}
+        .product-detail-thumbs button{padding:0;width:68px;height:68px;overflow:hidden;border:1px solid var(--border-color);border-radius:6px;background:#fff;cursor:pointer;opacity:.72;transition:.2s}
+        .product-detail-thumbs button.active,.product-detail-thumbs button:hover{border:2px solid var(--gold-primary);opacity:1;box-shadow:0 4px 12px rgba(0,0,0,.12)}
+        .product-detail-thumbs img{display:block;width:100%;height:100%;object-fit:cover}
+        .product-cinema{position:relative;margin-top:8px;padding:10px;border:1px solid rgba(212,175,55,.42);border-radius:10px;background:radial-gradient(ellipse at 50% 0%,#25372b,#070a08 72%);box-shadow:0 16px 38px rgba(0,0,0,.22)}
+        .product-cinema-label{display:flex;align-items:center;justify-content:space-between;gap:10px;color:#e8cf83;font-size:.82rem;margin:0 2px 9px}
+        .product-cinema video{display:block;width:100%;max-height:440px;aspect-ratio:16/9;object-fit:contain;background:#000;border-radius:6px}
+        .product-cinema-fullscreen{position:absolute;top:13px;left:13px;z-index:2;border:1px solid rgba(212,175,55,.7);border-radius:5px;padding:7px 10px;background:rgba(0,0,0,.72);color:#f5d982;cursor:pointer;font-size:.78rem}
+        .product-cinema:fullscreen{padding:3vh;background:#030504;display:flex;flex-direction:column;justify-content:center}
+        .product-cinema:fullscreen video{max-height:88vh;flex:1;aspect-ratio:auto}
+        .image-lightbox{position:fixed;inset:0;z-index:4000;display:none;align-items:center;justify-content:center;padding:22px;background:rgba(0,0,0,.96);backdrop-filter:blur(12px)}
+        .image-lightbox.open{display:flex}
+        .image-lightbox img{max-width:94vw;max-height:86vh;object-fit:contain;cursor:zoom-in;transition:transform .25s ease;user-select:none}
+        .image-lightbox img.zoomed{transform:scale(1.8);cursor:zoom-out;max-width:90vw;max-height:80vh}
+        .lightbox-close,.lightbox-nav,.lightbox-zoom{position:absolute;display:grid;place-items:center;border:1px solid rgba(212,175,55,.65);border-radius:50%;background:rgba(8,18,12,.88);color:#f4d77d;cursor:pointer}
+        .lightbox-close{top:18px;right:18px;width:44px;height:44px;font-size:27px}
+        .lightbox-nav{top:50%;width:44px;height:44px;font-size:24px;transform:translateY(-50%)}
+        .lightbox-prev{right:18px}.lightbox-next{left:18px}
+        .lightbox-zoom{bottom:22px;left:50%;transform:translateX(-50%);width:auto;height:40px;padding:0 16px;border-radius:25px;font-size:.82rem}
+        .lightbox-counter{position:absolute;bottom:28px;right:24px;color:#f5e7bd;font-size:.85rem}
 
         .checkout-form {
           display: flex;
@@ -3032,9 +3051,15 @@ Object.keys(TRANSLATIONS.fr).forEach(k => {
           const html = `
                 <div class="product-detail-grid">
                     <div class="product-detail-gallery">
-                        <img src="${detailImages[0] || product.image || ''}" class="product-detail-img product-detail-main" alt="${product.name}">
-                        ${detailImages.length > 1 ? `<div class="product-detail-thumbs">${detailImages.slice(1).map((url) => `<img src="${url}" alt="${product.name}" onclick="this.closest('.product-detail-gallery').querySelector('.product-detail-main').src=this.src">`).join('')}</div>` : ''}
-                        ${product.videoUrl ? `<video class="product-detail-video" controls playsinline preload="metadata"><source src="${product.videoUrl}"></video>` : ''}
+                        <div class="product-detail-main-wrap">
+                          <img src="${detailImages[0] || product.image || ''}" class="product-detail-img product-detail-main" alt="${product.name}" onclick="openProductImageViewer(${product.id},0)">
+                        </div>
+                        ${detailImages.length > 1 ? `<div class="product-detail-thumbs">${detailImages.map((url,index) => `<button type="button" class="${index===0?'active':''}" aria-label="عرض الصورة ${index+1}" onclick="setProductGalleryImage(this,${index},${product.id})"><img src="${url}" alt="${product.name} - ${index+1}"></button>`).join('')}</div>` : ''}
+                        ${product.videoUrl ? `<div class="product-cinema" id="product-cinema-${product.id}">
+                          <div class="product-cinema-label"><span>▶ عرض سينمائي للمنتج</span><span>FULL HD</span></div>
+                          <button type="button" class="product-cinema-fullscreen" onclick="toggleProductCinemaFullscreen('product-cinema-${product.id}')">⛶ ملء الشاشة</button>
+                          <video controls playsinline preload="metadata"><source src="${product.videoUrl}">متصفحك لا يدعم تشغيل الفيديو.</video>
+                        </div>` : ''}
                     </div>
                     <div>
                         <span style="color:var(--gold-primary); font-size:0.85rem; font-weight:bold;">${
@@ -3074,6 +3099,72 @@ Object.keys(TRANSLATIONS.fr).forEach(k => {
                 </div>
             `;
           openModal(html);
+        }
+
+        // Premium product gallery: image zoom, thumbnail selection and cinema mode.
+        let activeProductViewer = { images: [], index: 0 };
+        function setProductGalleryImage(button, index, productId) {
+          const product = PRODUCTS_DATABASE.find((p) => p.id === productId);
+          if (!product) return;
+          const images = [...new Set([...(Array.isArray(product.images) ? product.images : []), product.image].filter(Boolean))].slice(0, 6);
+          const main = button.closest('.product-detail-gallery').querySelector('.product-detail-main');
+          main.src = images[index] || product.image;
+          button.closest('.product-detail-thumbs').querySelectorAll('button').forEach((b) => b.classList.remove('active'));
+          button.classList.add('active');
+        }
+        function openProductImageViewer(productId, index) {
+          const product = PRODUCTS_DATABASE.find((p) => p.id === productId);
+          if (!product) return;
+          activeProductViewer.images = [...new Set([...(Array.isArray(product.images) ? product.images : []), product.image].filter(Boolean))].slice(0, 6);
+          activeProductViewer.index = Math.max(0, Math.min(index, activeProductViewer.images.length - 1));
+          if (!activeProductViewer.images.length) return;
+          let viewer = document.getElementById('product-image-lightbox');
+          if (!viewer) {
+            viewer = document.createElement('div');
+            viewer.id = 'product-image-lightbox';
+            viewer.className = 'image-lightbox';
+            viewer.innerHTML = '<button class="lightbox-close" aria-label="إغلاق" onclick="closeProductImageViewer()">×</button><button class="lightbox-nav lightbox-prev" aria-label="الصورة السابقة" onclick="stepProductImage(-1)">›</button><img id="product-lightbox-image" alt="صورة المنتج مكبرة" onclick="this.classList.toggle(\'zoomed\')"><button class="lightbox-nav lightbox-next" aria-label="الصورة التالية" onclick="stepProductImage(1)">‹</button><span class="lightbox-counter" id="product-lightbox-counter"></span><button class="lightbox-zoom" onclick="document.getElementById(\'product-lightbox-image\').classList.toggle(\'zoomed\')">＋ / − تكبير</button>';
+            document.body.appendChild(viewer);
+            viewer.addEventListener('click', (event) => { if (event.target === viewer) closeProductImageViewer(); });
+          }
+          updateProductImageViewer();
+          viewer.classList.add('open');
+          document.addEventListener('keydown', handleProductViewerKeys);
+        }
+        function updateProductImageViewer() {
+          const image = document.getElementById('product-lightbox-image');
+          const counter = document.getElementById('product-lightbox-counter');
+          if (!image) return;
+          image.classList.remove('zoomed');
+          image.src = activeProductViewer.images[activeProductViewer.index];
+          if (counter) counter.textContent = (activeProductViewer.index + 1) + ' / ' + activeProductViewer.images.length;
+          const nav = document.querySelectorAll('.lightbox-nav');
+          nav.forEach((el) => el.style.display = activeProductViewer.images.length > 1 ? 'grid' : 'none');
+        }
+        function stepProductImage(direction) {
+          const count = activeProductViewer.images.length;
+          if (!count) return;
+          activeProductViewer.index = (activeProductViewer.index + direction + count) % count;
+          updateProductImageViewer();
+        }
+        function closeProductImageViewer() {
+          const viewer = document.getElementById('product-image-lightbox');
+          if (viewer) viewer.classList.remove('open');
+          document.removeEventListener('keydown', handleProductViewerKeys);
+        }
+        function handleProductViewerKeys(event) {
+          if (event.key === 'Escape') closeProductImageViewer();
+          if (event.key === 'ArrowLeft') stepProductImage(1);
+          if (event.key === 'ArrowRight') stepProductImage(-1);
+        }
+        function toggleProductCinemaFullscreen(id) {
+          const cinema = document.getElementById(id);
+          if (!cinema) return;
+          if (document.fullscreenElement === cinema) {
+            document.exitFullscreen?.();
+          } else if (cinema.requestFullscreen) {
+            cinema.requestFullscreen().catch((error) => console.warn('Fullscreen unavailable:', error));
+          }
         }
 
         // Shopping Cart Modal View
