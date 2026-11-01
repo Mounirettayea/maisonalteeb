@@ -85,3 +85,19 @@ create policy "admins delete product images" on storage.objects for delete to au
 
 -- After creating the Supabase Auth user, assign the owner/admin role:
 -- insert into public.profiles (id, role) values ('AUTH-USER-UUID', 'admin') on conflict (id) do update set role = 'admin';
+
+
+-- Product media: up to six gallery images and one optional video.
+alter table public.products add column if not exists images text[] not null default '{}'::text[];
+alter table public.products add column if not exists video_url text;
+do $$ begin
+  if not exists (select 1 from pg_constraint where conname = 'products_images_max_six') then
+    alter table public.products add constraint products_images_max_six check (cardinality(images) <= 6);
+  end if;
+end $$;
+
+-- Shared public media bucket: images and product videos up to 100 MB.
+update storage.buckets
+set file_size_limit = 104857600,
+    allowed_mime_types = array['image/jpeg','image/png','image/webp','image/gif','image/avif','video/mp4','video/webm','video/quicktime']
+where id = 'product-images';
