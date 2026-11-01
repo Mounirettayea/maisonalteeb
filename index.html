@@ -2745,7 +2745,7 @@ Object.keys(TRANSLATIONS.fr).forEach(k => {
             '</div>'
           ).join('');
 
-          return \`
+          return `
             <section class="hero-section dar-hero">
               <div class="hero-content">
                 <div class="hero-text">
@@ -2762,7 +2762,7 @@ Object.keys(TRANSLATIONS.fr).forEach(k => {
                     <span><i data-lucide="gem"></i> اختيارات فاخرة</span>
                   </div>
                 </div>
-                <div class="dar-showcase">\${showcaseCards}</div>
+                <div class="dar-showcase">${showcaseCards}</div>
               </div>
             </section>
 
@@ -2773,7 +2773,7 @@ Object.keys(TRANSLATIONS.fr).forEach(k => {
               </div>
               <div class="categories-grid">
                 <div class="category-card" onclick="filterByCategory('العطور')">
-                  <img src="\${showcaseProducts[0]?.image || 'https://images.unsplash.com/photo-1594035910387-fea47794261f?q=80&w=800&auto=format&fit=crop'}" alt="العطور العربية" loading="lazy">
+                  <img src="${showcaseProducts[0]?.image || 'https://images.unsplash.com/photo-1594035910387-fea47794261f?q=80&w=800&auto=format&fit=crop'}" alt="العطور العربية" loading="lazy">
                   <div class="category-overlay"><div class="category-title">العطور العربية</div><div class="category-btn">اكتشف العطور <i data-lucide="chevron-left"></i></div></div>
                 </div>
                 <div class="category-card" onclick="filterByCategory('العطور')">
@@ -2797,10 +2797,10 @@ Object.keys(TRANSLATIONS.fr).forEach(k => {
                 <p class="section-subtitle">اختيارات مميزة من منتجات دار الطيب</p>
               </div>
               <div class="products-grid">
-                \${bestSellers.map((product) => renderProductCard(product)).join('')}
+                ${bestSellers.map((product) => renderProductCard(product)).join('')}
               </div>
             </section>
-          \`;
+          `;
         }
 
         // Render Shop Page View
