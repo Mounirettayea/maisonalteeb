@@ -2761,6 +2761,7 @@ Object.keys(TRANSLATIONS.fr).forEach(k => {
         // Render Homepage View
         function renderHomePage() {
           const bestSellers = PRODUCTS_DATABASE.filter((p) => p.isBestSeller).slice(0, 8);
+          const latestProducts = [...PRODUCTS_DATABASE].sort((a, b) => b.id - a.id).slice(0, 8);
           const showcaseCards = [
             { image: 'https://images.unsplash.com/photo-1594035910387-fea47794261f?q=80&w=1000&auto=format&fit=crop', title: 'العطور العربية', subtitle: 'نفحات شرقية فاخرة' },
             { image: 'https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?q=80&w=900&auto=format&fit=crop', title: 'الزيوت الطبيعية', subtitle: 'زيوت نقية للعناية والجمال' },
@@ -2826,6 +2827,16 @@ Object.keys(TRANSLATIONS.fr).forEach(k => {
               </div>
               <div class="products-grid">
                 ${bestSellers.map((product) => renderProductCard(product)).join('')}
+              </div>
+            </section>
+
+            <section>
+              <div class="section-header">
+                <h2 class="section-title">أحدث المنتجات</h2>
+                <p class="section-subtitle">اكتشف آخر الإضافات إلى تشكيلة دار الطيب</p>
+              </div>
+              <div class="products-grid">
+                ${latestProducts.map((product) => renderProductCard(product)).join('')}
               </div>
             </section>
           `;
