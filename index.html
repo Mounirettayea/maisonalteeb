@@ -4,16 +4,16 @@
 
       <meta charset="UTF-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      <title>العطور ومنتجات التجميل الطبيعية | Boutique de Luxe</title>
+      <title>Maison Al Teeb | منزل الطيب — العطور والزيوت الطبيعية</title>
       <meta
         name="description"
-        content="اكتشف تشكيلة مختارة من العطور الفاخرة ومنتجات العناية الطبيعية المغربية الفاخرة. توصيل لجميع مدن المغرب والتسديد عند الاستلام."
+        content="اكتشف منتجات Maison Al Teeb: العطور الفاخرة، الزيوت الطبيعية، العناية والجمال. توصيل لجميع مدن المغرب والدفع عند الاستلام."
       />
 
       <!-- Open Graph for Social Media SEO -->
       <meta
         property="og:title"
-        content="العطور ومنتجات التجميل الطبيعية الفاخرة"
+        content="Maison Al Teeb | منزل الطيب"
       />
       <meta
         property="og:description"
@@ -3350,36 +3350,37 @@ Object.keys(TRANSLATIONS.fr).forEach(k => {
         // Place Order Action
         function handlePlaceOrder(e) {
           e.preventDefault();
-          const name = document.getElementById('cust-name').value;
-          const phone = document.getElementById('cust-phone').value;
-          const city = document.getElementById('cust-city').value;
-          const address = document.getElementById('cust-address').value;
-
-          const orderItems = cart
-            .map((i) => `- ${i.name} (${i.size}) × ${i.qty}`)
-            .join('%0A');
-          const subtotal = cart.reduce(
-            (acc, item) => acc + item.price * item.qty,
-            0
-          );
-          const total =
-            subtotal +
-            (subtotal >= CONFIG.FREE_SHIPPING_THRESHOLD
-              ? 0
-              : CONFIG.SHIPPING_FEE);
-
-          const text = `*طلب جديد عبر الموقع*%0A%0A*الزبون:* ${name}%0A*الهاتف:* ${phone}%0A*المدينة:* ${city}%0A*العنوان:* ${address}%0A%0A*الطلبية:*%0A${orderItems}%0A%0A*المجموع الكلي:* ${total} ${CONFIG.CURRENCY}`;
-
-          // Reset Cart
-          cart = [];
-          saveCart();
-
-          // Redirect to WhatsApp
-          window.open(
-            `https://wa.me/${CONFIG.WHATSAPP_NUMBER}?text=${text}`,
-            '_blank'
-          );
-          closeModal();
+          if (!Array.isArray(cart) || cart.length === 0) { alert('سلة المشتريات فارغة.'); return; }
+          const name = document.getElementById('cust-name').value.trim();
+          const phone = document.getElementById('cust-phone').value.trim();
+          const city = document.getElementById('cust-city').value.trim();
+          const address = document.getElementById('cust-address').value.trim();
+          if (!name || !phone || !city || !address) { alert('المرجو إكمال جميع معلومات التوصيل.'); return; }
+          const orderItems = cart.map((item) => {
+            const quantity = Math.max(1, Math.floor(Number(item.qty) || 1));
+            const price = Math.max(0, Number(item.price) || 0);
+            return `- ${item.name} (${item.size || '—'}) × ${quantity} — ${price * quantity} ${CONFIG.CURRENCY}`;
+          }).join('\n');
+          const subtotal = cart.reduce((sum, item) => {
+            const quantity = Math.max(1, Math.floor(Number(item.qty) || 1));
+            const price = Math.max(0, Number(item.price) || 0);
+            return sum + price * quantity;
+          }, 0);
+          const shipping = subtotal >= CONFIG.FREE_SHIPPING_THRESHOLD ? 0 : CONFIG.SHIPPING_FEE;
+          const total = subtotal + shipping;
+          const message = [
+            '*طلب جديد عبر موقع MAISON AL TEEB*', '',
+            `*الزبون:* ${name}`, `*الهاتف:* ${phone}`, `*المدينة:* ${city}`, `*العنوان:* ${address}`,
+            '', '*الطلبية:*', orderItems, '',
+            `*المجموع الفرعي:* ${subtotal} ${CONFIG.CURRENCY}`,
+            `*التوصيل:* ${shipping} ${CONFIG.CURRENCY}`,
+            `*المجموع الكلي:* ${total} ${CONFIG.CURRENCY}`
+          ].join('\n');
+          const whatsappUrl = `https://wa.me/${CONFIG.WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+          const whatsappWindow = window.open(whatsappUrl, '_blank');
+          if (!whatsappWindow) { alert('تعذر فتح WhatsApp. اسمح بفتح النوافذ المنبثقة ثم أعد المحاولة. سلتك ما زالت محفوظة.'); return; }
+          whatsappWindow.opener = null;
+          cart = []; saveCart(); closeModal();
         }
 
         // Wishlist Modal View
@@ -3454,7 +3455,7 @@ Object.keys(TRANSLATIONS.fr).forEach(k => {
                 isBestSeller: Boolean(p.is_best_seller),
                 description: p.description || ''
               }))
-              .filter((p) => Number.isFinite(p.id) && p.id > 0)
+              .filter((p) => Number.isFinite(p.id) && p.id > 0 && Number.isFinite(p.price) && p.price > 0)
               .sort((a, b) => a.id - b.id);
 
             console.info(`Supabase: loaded ${PRODUCTS_DATABASE.length} active products.`);
